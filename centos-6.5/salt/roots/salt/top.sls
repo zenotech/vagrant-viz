@@ -1,0 +1,5 @@
+base:
+    '*':
+        - general
+        - centos
+

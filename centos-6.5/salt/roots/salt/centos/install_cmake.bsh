@@ -1,0 +1,31 @@
+#!/bin/bash
+
+export PATH=$PATH:/usr/local/bin
+
+echo "Checking for CMake"
+CMAKE=`which cmake`
+
+if [ ! -f "$CMAKE" ]; then
+
+	echo 'Installing CMake'
+
+	mkdir BUILD
+
+	pushd BUILD
+
+	wget http://packages.zenotech.com/cmake-2.8.11.tar.gz
+
+	tar xvf cmake-2.8.11.tar.gz
+
+	pushd cmake-2.8.11
+
+	./bootstrap --prefix=/usr/local
+	make clean
+	make -j12
+	make install
+
+	echo 'Installed CMake'
+
+	popd
+
+fi

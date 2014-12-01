@@ -1,0 +1,88 @@
+#!/bin/bash
+
+export PATH=$PATH:/usr/local/bin
+
+echo "Checking for ParaView"
+PVSERVER=`which pvserver`
+
+echo $PVSERVER
+
+if [ ! -f "$PVSERVER" ]; then
+
+	echo 'Installing ParaView'
+
+	mkdir BUILD
+
+	pushd BUILD
+
+	git clone https://github.com/zenotech/ParaViewSuperbuild.git
+
+	pushd ParaViewSuperbuild
+
+	git checkout origin/release
+
+	popd
+
+	mkdir ParaViewDep_build
+
+	pushd ParaViewDep_build
+	rm CMakeCache.txt
+
+	cmake -D CMAKE_BUILD_TYPE=Release \
+	      -D ENABLE_boost=ON \
+	      -D ENABLE_ffmpeg=ON \
+	      -D ENABLE_hdf5=ON \
+	      -D ENABLE_mpi=ON \
+	      -D ENABLE_osmesa=ON \
+	      -D ENABLE_python=ON \
+	      ../ParaViewSuperbuild
+
+	make -j4
+
+	echo 'Installed ParaView Dependencies'
+
+	popd
+
+	git clone https://github.com/zenotech/ParaView.git
+
+	pushd ParaView
+	git submodule init
+	git submodule update
+	popd
+
+	mkdir ParaView_build
+	pushd ParaView_build
+
+	PREFIX=`pwd`/../ParaViewDep_build/install
+	export PATH=$PREFIX:$PATH
+	export LD_LIBRARY_PATH=$PREFIX/lib
+	export BOOST_ROOT=$PREFIX
+
+	cmake -D BUILD_SHARED_LIBS=ON \
+	      -D CMAKE_BUILD_TYPE=Release \
+	      -D CMAKE_INSTALL_PREFIX=${PREFIX} \
+	      -D PARAVIEW_BUILD_QT_GUI=OFF \
+	      -D PARAVIEW_USE_MPI=ON \
+	      -D PARAVIEW_USE_VISITBRIDGE=OFF \
+	      -D PARAVIEW_INSTALL_DEVELOPMENT_FILES=ON \
+	      -D ENABLE_MPI4PY=ON \
+	      -D PARAVIEW_ENABLE_PYTHON=ON \
+	      -D PYTHON_EXECUTABLE=${PREFIX}/bin/python \
+	      -D VTK_OPENGL_HAS_OSMESA=ON \
+	      -D VTK_XDMF_USE_MPI=ON \
+	      -D VTK_USE_SYSTEM_HDF5=ON \
+	      -D XDMF_BUILD_MPI=ON \
+	      -D OSMESA_INCLUDE_DIR=${PREFIX}/include \
+	      -D OSMESA_LIBRARY=${PREFIX}/lib/libOSMesa.so \
+	      -D OPENGL_INCLUDE_DIR=${PREFIX}/include \
+	      -D OPENGL_gl_LIBRARY= \
+	      -D OPENGL_glu_LIBRARY=${PREFIX}/lib/libGLU.so \
+	      -D OPENGL_xmesa_INCLUDE_DIR= \
+	      -D VTK_USE_X=OFF \
+	      ../ParaView
+
+
+
+
+
+fi

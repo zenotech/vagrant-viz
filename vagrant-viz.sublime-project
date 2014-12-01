@@ -1,0 +1,11 @@
+{
+	"folders":
+	[
+		{
+			"path": "../vagrant-viz",
+			"folder_exclude_patterns": ["build"],
+			"file_exclude_patterns": []
+		}
+	],
+
+}
