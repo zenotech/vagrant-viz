@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export PATH=$PATH:/usr/local/bin
+export PATH=$PATH:/opt/ParaView/bin
 
 echo "Checking for ParaView"
 PVSERVER=`which pvserver`
@@ -12,77 +12,50 @@ if [ ! -f "$PVSERVER" ]; then
 	echo 'Installing ParaView'
 
 	mkdir BUILD
-
 	pushd BUILD
 
+	# Clone the repo
 	git clone https://github.com/zenotech/ParaViewSuperbuild.git
 
+	# Checkout branch
 	pushd ParaViewSuperbuild
-
-	git checkout origin/release
-
+	git checkout master
 	popd
 
-	mkdir ParaViewDep_build
+	# Build directory
+	mkdir ParaView_build
 
-	pushd ParaViewDep_build
+	# Build
+	pushd ParaView_build
 	rm CMakeCache.txt
 
-	cmake -D CMAKE_BUILD_TYPE=Release \
-	      -D ENABLE_boost=ON \
-	      -D ENABLE_ffmpeg=ON \
-	      -D ENABLE_hdf5=ON \
-	      -D ENABLE_mpi=ON \
-	      -D ENABLE_osmesa=ON \
-	      -D ENABLE_python=ON \
-	      ../ParaViewSuperbuild
-
-	make -j4
-
-	echo 'Installed ParaView Dependencies'
-
-	popd
-
-	git clone https://github.com/zenotech/ParaView.git
-
-	pushd ParaView
-	git submodule init
-	git submodule update
-	popd
-
-	mkdir ParaView_build
-	pushd ParaView_build
-
-	PREFIX=`pwd`/../ParaViewDep_build/install
-	export PATH=$PREFIX:$PATH
+	PREFIX=`pwd`/install
+	export PATH=$PREFIX/bin:$PATH
 	export LD_LIBRARY_PATH=$PREFIX/lib
 	export BOOST_ROOT=$PREFIX
 
-	cmake -D BUILD_SHARED_LIBS=ON \
-	      -D CMAKE_BUILD_TYPE=Release \
-	      -D CMAKE_INSTALL_PREFIX=${PREFIX} \
-	      -D PARAVIEW_BUILD_QT_GUI=OFF \
-	      -D PARAVIEW_USE_MPI=ON \
-	      -D PARAVIEW_USE_VISITBRIDGE=OFF \
-	      -D PARAVIEW_INSTALL_DEVELOPMENT_FILES=ON \
-	      -D ENABLE_MPI4PY=ON \
-	      -D PARAVIEW_ENABLE_PYTHON=ON \
-	      -D PYTHON_EXECUTABLE=${PREFIX}/bin/python \
-	      -D VTK_OPENGL_HAS_OSMESA=ON \
-	      -D VTK_XDMF_USE_MPI=ON \
-	      -D VTK_USE_SYSTEM_HDF5=ON \
-	      -D XDMF_BUILD_MPI=ON \
-	      -D OSMESA_INCLUDE_DIR=${PREFIX}/include \
-	      -D OSMESA_LIBRARY=${PREFIX}/lib/libOSMesa.so \
-	      -D OPENGL_INCLUDE_DIR=${PREFIX}/include \
-	      -D OPENGL_gl_LIBRARY= \
-	      -D OPENGL_glu_LIBRARY=${PREFIX}/lib/libGLU.so \
-	      -D OPENGL_xmesa_INCLUDE_DIR= \
-	      -D VTK_USE_X=OFF \
-	      ../ParaView
+	PV_EXTRA_ARGS="-DCMAKE_BUILD_TYPE:STRING=Release -DPYTHON_EXECUTABLE:STRING=${PREFIX}/bin/python -DVTK_OPENGL_HAS_OSMESA:BOOL=ON -DVTK_XDMF_USE_MPI:BOOL=ON -DVTK_USE_SYSTEM_HDF5:BOOL=ON -DXDMF_BUILD_MPI:BOOL=ON -DOSMESA_INCLUDE_DIR:STRING=${PREFIX}/include -DOSMESA_LIBRARY:STRING=${PREFIX}/lib/libOSMesa.so -DOPENGL_INCLUDE_DIR:STRING=${PREFIX}/include -DOPENGL_gl_LIBRARY:STRING="" -DOPENGL_glu_LIBRARY:STRING=${PREFIX}/lib/libGLU.so -DOPENGL_xmesa_INCLUDE_DIR:STRING="" -DVTK_USE_X:BOOL=OFF"
 
+	cmake -DCMAKE_BUILD_TYPE:STRING:=Release \
+	      -DENABLE_boost:BOOL=ON \
+	      -DENABLE_ffmpeg:BOOL=ON \
+	      -DENABLE_hdf5:BOOL=ON \
+	      -DENABLE_mpi:BOOL=ON \
+	      -DENABLE_osmesa:BOOL=ON \
+	      -DENABLE_python:BOOL=ON \
+	      -DENABLE_paraviewsdk:BOOL=OFF \
+	      -DENABLE_paraview:BOOL=ON \
+	      -DPV_EXTRA_CMAKE_ARGS:STRING="${PV_EXTRA_ARGS}" \
+	      ../ParaViewSuperbuild
 
+	make -j2
 
+	# This needs further testing
+	#cpack -G TGZ
+
+	echo 'Installed ParaView in /opt/ParaView'
+
+	popd
 
 
 fi
