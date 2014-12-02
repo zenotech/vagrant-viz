@@ -3,11 +3,11 @@
 export PATH=$PATH:/opt/ParaView/bin
 
 echo "Checking for ParaView"
-PVSERVER=`which pvserver`
+PARAVIEW=`which paraview`
 
-echo $PVSERVER
+echo $PARAVIEW
 
-if [ ! -f "$PVSERVER" ]; then
+if [ ! -f "$PARAVIEW" ]; then
 
 	echo 'Installing ParaView'
 
@@ -51,15 +51,17 @@ if [ ! -f "$PVSERVER" ]; then
 
 	make -j2
 
-	# This needs further testing
-	#cpack -G TGZ
+		# Package
+	cpack -G TGZ
 
 	# Install
 	pushd /opt
-	
+	sudo tar xvf ~/BUILD/ParaView_build/ParaView-4.2.0-Linux-64bit.tar.gz
+	sudo ln -s ParaView-4.2.0-Linux-64bit ParaView
 	popd
 
 	echo 'Installed ParaView in /opt/ParaView'
+	echo `ls -lta ParaView-4.2.0-Linux-64bit.tar.gz`
 
 	popd
 
