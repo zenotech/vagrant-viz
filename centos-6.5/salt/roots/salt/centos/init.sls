@@ -9,6 +9,7 @@ centos:
             - makedepdend
             - flex
             - bison
+            - libX11-devel
 
 /etc/motd:
     file.append:
