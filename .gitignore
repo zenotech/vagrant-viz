@@ -34,3 +34,5 @@ build/
 .rvmrc
 
 /centos-6.5/.vagrant
+
+centos-6.5/ParaView-4.2.0-Linux-64bit.tar.gz

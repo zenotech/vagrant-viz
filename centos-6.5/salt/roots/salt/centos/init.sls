@@ -9,6 +9,10 @@ centos:
             - makedepdend
             - flex
             - bison
+            - kernel-devel
+            - xorg-x11-server-Xorg
+            - xorg-x11-server-devel
+            - libXt-devel
             - libX11-devel
 
 /etc/motd:

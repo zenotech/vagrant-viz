@@ -3,20 +3,20 @@
 export PATH=$PATH:/opt/ParaView/bin
 
 echo "Checking for ParaView"
-PARAVIEW=`which paraview`
+PVSERVER=`which pvserver`
 
-echo $PARAVIEW
+echo $PVSERVER
 
-if [ ! -f "$PARAVIEW" ]; then
+if [ ! -f "$PVSERVER" ]; then
+
+	echo 'Installing ParaView'
 
 	# Install latest nvidia driver
 	wget http://packages.zenotech.com/NVIDIA-Linux-x86_64-340.58.run
 
-	sudo sh NVIDIA-Linux-x86_64-340.58.run --accept-license --update --silent
+	sudo sh NVIDIA-Linux-x86_64-340.58.run --accept-license --update
 
 	sudo nvidia-xconfig -a --use-display-device=None --virtual=1280x1024
-
-	echo 'Installing ParaView'
 
 	mkdir BUILD
 	pushd BUILD
@@ -41,15 +41,14 @@ if [ ! -f "$PARAVIEW" ]; then
 	export LD_LIBRARY_PATH=$PREFIX/lib
 	export BOOST_ROOT=$PREFIX
 
-	PV_EXTRA_ARGS="-DCMAKE_BUILD_TYPE:STRING=Release -DUSE_SYSTEM_python:BOOL=ON -DPYTHON_EXECUTABLE:STRING=${PREFIX}/bin/python -DVTK_USE_SYSTEM_HDF5:BOOL=ON"
+	PV_EXTRA_ARGS="-DCMAKE_BUILD_TYPE:STRING=Release -DPYTHON_EXECUTABLE:STRING=${PREFIX}/bin/python -DVTK_XDMF_USE_MPI:BOOL=ON -DVTK_USE_SYSTEM_HDF5:BOOL=ON -DXDMF_BUILD_MPI:BOOL=ON"
 
 	cmake -DCMAKE_BUILD_TYPE:STRING:=Release \
 	      -DENABLE_boost:BOOL=ON \
 	      -DENABLE_ffmpeg:BOOL=ON \
 	      -DENABLE_hdf5:BOOL=ON \
-	      -DENABLE_mpi:BOOL=OFF \
+	      -DENABLE_mpi:BOOL=ON \
 	      -DENABLE_osmesa:BOOL=OFF \
-	      -DENABLE_qt:BOOL=ON \
 	      -DENABLE_python:BOOL=ON \
 	      -DENABLE_paraviewsdk:BOOL=OFF \
 	      -DENABLE_paraview:BOOL=ON \
