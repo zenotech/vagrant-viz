@@ -12,7 +12,7 @@ if [ ! -f "$PARAVIEW" ]; then
 	# Install latest nvidia driver
 	wget http://packages.zenotech.com/NVIDIA-Linux-x86_64-340.58.run
 
-	sudo sh NVIDIA-Linux-x86_64-340.58.run --accept-license --update --silent
+	sudo sh NVIDIA-Linux-x86_64-340.58.run --accept-license --update --silent --no-kernel-module
 
 	sudo nvidia-xconfig -a --use-display-device=None --virtual=1280x1024
 
@@ -41,7 +41,7 @@ if [ ! -f "$PARAVIEW" ]; then
 	export LD_LIBRARY_PATH=$PREFIX/lib
 	export BOOST_ROOT=$PREFIX
 
-	PV_EXTRA_ARGS="-DCMAKE_BUILD_TYPE:STRING=Release -DUSE_SYSTEM_python:BOOL=ON -DPYTHON_EXECUTABLE:STRING=${PREFIX}/bin/python -DVTK_USE_SYSTEM_HDF5:BOOL=ON"
+	PV_EXTRA_ARGS="-DCMAKE_BUILD_TYPE:STRING=Release;-DUSE_SYSTEM_python:BOOL=OFF;-DPYTHON_EXECUTABLE:FILEPATH=${PREFIX}/bin/python;-DVTK_USE_SYSTEM_HDF5:BOOL=ON"
 
 	cmake -DCMAKE_BUILD_TYPE:STRING:=Release \
 	      -DENABLE_boost:BOOL=ON \
@@ -54,6 +54,7 @@ if [ ! -f "$PARAVIEW" ]; then
 	      -DENABLE_paraviewsdk:BOOL=OFF \
 	      -DENABLE_paraview:BOOL=ON \
 	      -DPV_EXTRA_CMAKE_ARGS:STRING="${PV_EXTRA_ARGS}" \
+	      -DCPACK_PACKAGE_NAME:STRING=ParaView \
 	      ../ParaViewSuperbuild
 
 	make -j2

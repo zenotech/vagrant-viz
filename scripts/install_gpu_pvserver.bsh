@@ -1,0 +1,75 @@
+#!/bin/bash
+
+export PATH=$PATH:/opt/ParaViewServerGPU/bin
+
+echo "Checking for ParaViewServerGPU"
+PVSERVER=`which pvserver`
+
+echo $PVSERVER
+
+if [ ! -f "$PVSERVER" ]; then
+
+	echo 'Installing ParaViewServerGPU'
+
+	# Install latest nvidia driver
+	wget http://packages.zenotech.com/NVIDIA-Linux-x86_64-340.58.run
+
+	sudo sh NVIDIA-Linux-x86_64-340.58.run --accept-license --update --silent --no-kernel-module
+
+	sudo nvidia-xconfig -a --use-display-device=None --virtual=1280x1024
+
+	mkdir BUILD
+	pushd BUILD
+
+	# Clone the repo
+	git clone https://github.com/zenotech/ParaViewSuperbuild.git
+
+	# Checkout branch
+	pushd ParaViewSuperbuild
+	git checkout master
+	popd
+
+	# Build directory
+	mkdir ParaViewServerGPU_build
+
+	# Build
+	pushd ParaViewServerGPU_build
+	rm CMakeCache.txt
+
+	PREFIX=`pwd`/install
+	export PATH=$PREFIX/bin:$PATH
+	export LD_LIBRARY_PATH=$PREFIX/lib
+	export BOOST_ROOT=$PREFIX
+
+	PV_EXTRA_ARGS="-DCMAKE_BUILD_TYPE:STRING=Release;-DUSE_SYSTEM_python:BOOL=OFF;-DPYTHON_EXECUTABLE:FILEPATH=${PREFIX}/bin/python;-DVTK_XDMF_USE_MPI:BOOL=ON;-DVTK_USE_SYSTEM_HDF5:BOOL=ON;-DXDMF_BUILD_MPI:BOOL=ON"
+
+	cmake -DCMAKE_BUILD_TYPE:STRING:=Release \
+	      -DENABLE_boost:BOOL=ON \
+	      -DENABLE_ffmpeg:BOOL=ON \
+	      -DENABLE_hdf5:BOOL=ON \
+	      -DENABLE_mpi:BOOL=ON \
+	      -DENABLE_osmesa:BOOL=OFF \
+	      -DENABLE_python:BOOL=ON \
+	      -DENABLE_paraviewsdk:BOOL=OFF \
+	      -DPV_EXTRA_CMAKE_ARGS:STRING="${PV_EXTRA_ARGS}" \
+	      -DENABLE_paraview:BOOL=ON \
+	      -DCPACK_PACKAGE_NAME:STRING=ParaViewServerGPU \
+	      ../ParaViewSuperbuild
+
+	make -j2
+
+	# Package
+	cpack -G TGZ
+
+	# Install
+	pushd /opt
+	sudo tar xvf ~/BUILD/ParaView_build/ParaViewServerGPU-4.2.0-Linux-64bit.tar.gz
+	sudo ln -s ParaViewServerGPU-4.2.0-Linux-64bit ParaViewServerGPU
+	popd
+
+	echo 'Installed ParaViewServerGPU in /opt/ParaViewServerGPU'
+	echo `ls -lta ParaViewServerGPU-4.2.0-Linux-64bit.tar.gz`
+
+	popd
+
+fi
