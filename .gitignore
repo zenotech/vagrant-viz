@@ -36,3 +36,5 @@ build/
 /centos-6.5/.vagrant
 
 centos-6.5/ParaView-4.2.0-Linux-64bit.tar.gz
+
+/ubuntu-14.05/.vagrant

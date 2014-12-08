@@ -1,19 +1,20 @@
-centos:
+ubuntu:
     pkg.installed:
         - pkgs:
             - git
+            - build-essential
             - gcc
-            - gcc-c++
+            - g++
             - make
-            - cmake28
-            - imake
+            - cmake
+            - xutils-dev
             - flex
             - bison
-            - kernel-devel
-            - xorg-x11-server-Xorg
-            - xorg-x11-server-devel
-            - libXt-devel
-            - libX11-devel
+            - linux-headers-generic
+            - xserver-xorg
+            - xserver-xorg-dev
+            - libxt-dev
+            - libx11-dev
 
 /etc/motd:
     file.append:
