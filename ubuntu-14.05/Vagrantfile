@@ -23,6 +23,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     ## load the salt folder
     trusty64.vm.synced_folder "salt/roots/", "/srv/"
+    ## load install scripts
+    trusty64.vm.synced_folder "../scripts", "/srv/scripts/"
     
     # provision
     trusty64.vm.provision :salt do |salt|

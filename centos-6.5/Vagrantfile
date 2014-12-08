@@ -22,6 +22,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     ## load the salt folder
     centos65.vm.synced_folder "salt/roots/", "/srv/"
+    ## load install scripts
+    centos65.vm.synced_folder "../scripts", "/srv/scripts/"
     
     # provision
     centos65.vm.provision :salt do |salt|
